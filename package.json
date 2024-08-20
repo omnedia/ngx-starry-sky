@@ -1,0 +1,26 @@
+{
+  "name": "@omnedia/ngx-starry-sky",
+  "description": "A simple component library to create a container with an animated background.",
+  "version": "0.0.1",
+  "peerDependencies": {
+    "@angular/common": "^18.2.0",
+    "@angular/core": "^18.2.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false,
+  "keywords": [
+    "npm",
+    "background",
+    "sky",
+    "stars",
+    "shooting stars",
+    "animation"
+  ],
+  "repository": {
+    "url": "https://github.com/omnedia/ngx-starry-sky"
+  },
+  "author": "Markus Block (markus.block@omnedia.com)",
+  "license": "MIT"
+}

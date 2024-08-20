@@ -1,0 +1,12 @@
+<div
+  class="om-starry-sky"
+  [ngStyle]="style"
+  [ngClass]="styleClass"
+  #OmStarrySkyWrapper
+>
+  <div class="om-starry-sky-background">
+    <canvas #OmStarrySkyCanvas></canvas>
+  </div>
+
+  <ng-content></ng-content>
+</div>
