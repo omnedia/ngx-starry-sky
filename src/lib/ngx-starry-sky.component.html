@@ -1,10 +1,20 @@
-<div
-  class="om-starry-sky"
-  [ngStyle]="style"
-  [ngClass]="styleClass"
-  #OmStarrySkyWrapper
->
+<div class="om-starry-sky" [ngStyle]="style" [ngClass]="styleClass" #OmStarrySkyWrapper>
   <div class="om-starry-sky-background">
+    <svg #OmStarrySkySvg>
+      @if (shootingStar) {
+      <rect [attr.key]="shootingStar.id" [attr.x]="shootingStar.x" [attr.y]="shootingStar.y"
+        [attr.width]="(shootingStarsProps.starWidth ?? 1) * (shootingStar.scale)"
+        [attr.height]="shootingStarsProps.starHeight ?? 10" [attr.fill]="'url(#gradient)'"
+        [attr.transform]="'rotate(' + shootingStar.angle + ', ' + (shootingStar.x + (shootingStarsProps.starWidth ?? 1) * shootingStar.scale / 2) + ', ' + (shootingStar.y + (shootingStarsProps.starHeight ?? 10) / 2) + ')'">
+      </rect>
+      <defs>
+        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" [style.stopColor]="shootingStarsProps.trailColor" [style.stopOpacity]="'0'" />
+          <stop offset="100%" [style.stopColor]="shootingStarsProps.starColor" [style.stopOpacity]="'1'" />
+        </linearGradient>
+      </defs>
+      }
+    </svg>
     <canvas #OmStarrySkyCanvas></canvas>
   </div>
 

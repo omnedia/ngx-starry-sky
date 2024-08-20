@@ -11,7 +11,9 @@
     height: 100%;
     background-color: var(--om-starry-sky-color);
 
-    canvas {
+    canvas,
+    svg {
+      position: absolute;
       width: 100%;
       height: 100%;
       inset: 0;
