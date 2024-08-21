@@ -237,10 +237,6 @@ export class NgxStarrySkyComponent implements AfterViewInit {
     this.shootingStar = prevStar;
   }
 
-  /* private updateShootingStarDom(): void {
-    this.svgRef.nativeElement
-  } */
-
   private getRandomStartPoint(): { x: number; y: number; angle: number } {
     const side = Math.floor(Math.random() * 4);
     const offset = Math.random() * window.innerWidth;
