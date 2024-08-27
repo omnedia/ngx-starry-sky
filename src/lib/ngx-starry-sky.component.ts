@@ -4,6 +4,7 @@ import {
   Component,
   ElementRef,
   Input,
+  OnDestroy,
   ViewChild,
 } from "@angular/core";
 import {
@@ -20,7 +21,7 @@ import {
   templateUrl: "./ngx-starry-sky.component.html",
   styleUrl: "./ngx-starry-sky.component.scss",
 })
-export class NgxStarrySkyComponent implements AfterViewInit {
+export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
   @ViewChild("OmStarrySkyCanvas")
   canvasRef!: ElementRef<HTMLCanvasElement>;
 
@@ -81,7 +82,13 @@ export class NgxStarrySkyComponent implements AfterViewInit {
     this.initShootingStars();
   }
 
+  ngOnDestroy(): void {
+    window.removeEventListener("resize", () => this.setCanvasSize());
+  }
+
   private initStarSky(): void {
+    window.addEventListener("resize", () => this.setCanvasSize());
+
     this.setCanvasSize();
     this.updateStars();
     this.renderStarSky();
