@@ -77,13 +77,53 @@ export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
 
   private stars: StarProps[] = [];
 
+  private isInView = false;
+  private isAnimating = false;
+  private animationFrameIdSky?: number;
+  private animationFrameIdShootingStar?: number;
+  private intersectionObserver?: IntersectionObserver;
+
   ngAfterViewInit(): void {
     this.initStarSky();
     this.initShootingStars();
+
+    this.intersectionObserver = new IntersectionObserver(([entry]) => {
+      this.renderContents(entry.isIntersecting);
+    });
+    this.intersectionObserver.observe(this.canvasRef.nativeElement);
   }
 
   ngOnDestroy(): void {
     window.removeEventListener("resize", () => this.setCanvasSize());
+
+    if (this.intersectionObserver) {
+      this.intersectionObserver.disconnect();
+    }
+
+    if (this.animationFrameIdSky) {
+      cancelAnimationFrame(this.animationFrameIdSky);
+    }
+
+    if (this.animationFrameIdShootingStar) {
+      cancelAnimationFrame(this.animationFrameIdShootingStar);
+    }
+  }
+
+  renderContents(isIntersecting: boolean) {
+    if (isIntersecting && !this.isInView) {
+      this.isInView = true;
+
+      if (!this.isAnimating) {
+        this.animationFrameIdSky = requestAnimationFrame(() =>
+          this.renderStarSky()
+        );
+        this.animationFrameIdShootingStar = requestAnimationFrame(() =>
+          this.moveShootingStar()
+        );
+      }
+    } else if (!isIntersecting) {
+      this.isInView = false;
+    }
   }
 
   private initStarSky(): void {
@@ -104,6 +144,13 @@ export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
   }
 
   private renderStarSky(): void {
+    if (!this.isInView) {
+      this.isAnimating = false;
+      return;
+    }
+
+    this.isAnimating = true;
+
     const context = this.canvasRef.nativeElement.getContext("2d");
 
     if (!context) {
@@ -130,7 +177,9 @@ export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
       }
     });
 
-    window.requestAnimationFrame(() => this.renderStarSky());
+    this.animationFrameIdSky = requestAnimationFrame(() =>
+      this.renderStarSky()
+    );
   }
 
   private updateStars(): void {
@@ -211,7 +260,16 @@ export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    window.requestAnimationFrame(() => this.moveShootingStar());
+    if (!this.isInView) {
+      this.isAnimating = false;
+      return;
+    }
+
+    this.isAnimating = true;
+
+    this.animationFrameIdShootingStar = requestAnimationFrame(() =>
+      this.moveShootingStar()
+    );
 
     if (!this.shootingStar) {
       return;
