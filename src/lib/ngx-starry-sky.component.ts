@@ -1,18 +1,6 @@
-import { CommonModule } from "@angular/common";
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  Input,
-  OnDestroy,
-  ViewChild,
-} from "@angular/core";
-import {
-  ShootingStar,
-  ShootingStarsProps,
-  StarBackgroundProps,
-  StarProps,
-} from "./ngx-starry-sky.types";
+import {CommonModule, isPlatformBrowser} from "@angular/common";
+import {AfterViewInit, Component, ElementRef, Inject, Input, OnDestroy, PLATFORM_ID, ViewChild,} from "@angular/core";
+import {ShootingStar, ShootingStarsProps, StarBackgroundProps, StarProps,} from "./ngx-starry-sky.types";
 
 @Component({
   selector: "om-starry-sky",
@@ -44,7 +32,7 @@ export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
 
   @Input("starsBackgroundConfig")
   set starsBackgroundPropsValue(props: StarBackgroundProps) {
-    this.starsBackgroundProps = { ...this.starsBackgroundProps, ...props };
+    this.starsBackgroundProps = {...this.starsBackgroundProps, ...props};
   }
 
   private starsBackgroundProps: StarBackgroundProps = {
@@ -57,7 +45,7 @@ export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
 
   @Input("shootingStarsConfig")
   set shootingStarsPropsValue(props: ShootingStarsProps) {
-    this.shootingStarsProps = { ...this.shootingStarsProps, ...props };
+    this.shootingStarsProps = {...this.shootingStarsProps, ...props};
   }
 
   shootingStarsProps: ShootingStarsProps = {
@@ -83,14 +71,21 @@ export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
   private animationFrameIdShootingStar?: number;
   private intersectionObserver?: IntersectionObserver;
 
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: object
+  ) {
+  }
+
   ngAfterViewInit(): void {
     this.initStarSky();
     this.initShootingStars();
 
-    this.intersectionObserver = new IntersectionObserver(([entry]) => {
-      this.renderContents(entry.isIntersecting);
-    });
-    this.intersectionObserver.observe(this.canvasRef.nativeElement);
+    if (isPlatformBrowser(this.platformId)) {
+      this.intersectionObserver = new IntersectionObserver(([entry]) => {
+        this.renderContents(entry.isIntersecting);
+      });
+      this.intersectionObserver.observe(this.canvasRef.nativeElement);
+    }
   }
 
   ngOnDestroy(): void {
@@ -189,7 +184,7 @@ export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    const { width, height } =
+    const {width, height} =
       this.wrapperRef.nativeElement.getBoundingClientRect();
 
     this.stars = this.generateStars(width, height);
@@ -200,7 +195,7 @@ export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
     const numStars = Math.floor(
       area * (this.starsBackgroundProps.starDensity ?? 0.00015)
     );
-    return Array.from({ length: numStars }, () => {
+    return Array.from({length: numStars}, () => {
       const shouldTwinkle =
         this.starsBackgroundProps.allStarsTwinkle ||
         Math.random() < (this.starsBackgroundProps.twinkleProbability ?? 0.7);
@@ -212,9 +207,9 @@ export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
         opacity: Math.random() * 0.5 + 0.5,
         twinkleSpeed: shouldTwinkle
           ? (this.starsBackgroundProps.minTwinkleSpeed ?? 0.5) +
-            Math.random() *
-              ((this.starsBackgroundProps.maxTwinkleSpeed ?? 1) -
-                (this.starsBackgroundProps.minTwinkleSpeed ?? 0.5))
+          Math.random() *
+          ((this.starsBackgroundProps.maxTwinkleSpeed ?? 1) -
+            (this.starsBackgroundProps.minTwinkleSpeed ?? 0.5))
           : null,
       };
     });
@@ -228,7 +223,7 @@ export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
   }
 
   private createShootingStar(): void {
-    const { x, y, angle } = this.getRandomStartPoint();
+    const {x, y, angle} = this.getRandomStartPoint();
 
     const newStar: ShootingStar = {
       id: Date.now(),
@@ -238,8 +233,8 @@ export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
       scale: 1,
       speed:
         Math.random() *
-          ((this.shootingStarsProps.maxSpeed ?? 30) -
-            (this.shootingStarsProps.minSpeed ?? 10)) +
+        ((this.shootingStarsProps.maxSpeed ?? 30) -
+          (this.shootingStarsProps.minSpeed ?? 10)) +
         (this.shootingStarsProps.minSpeed ?? 10),
       distance: 0,
     };
@@ -248,8 +243,8 @@ export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
 
     const randomDelay =
       Math.random() *
-        ((this.shootingStarsProps.maxDelay ?? 4200) -
-          (this.shootingStarsProps.minDelay ?? 1200)) +
+      ((this.shootingStarsProps.maxDelay ?? 4200) -
+        (this.shootingStarsProps.minDelay ?? 1200)) +
       (this.shootingStarsProps.minDelay ?? 1200);
 
     setTimeout(() => this.createShootingStar(), randomDelay);
@@ -308,15 +303,15 @@ export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
 
     switch (side) {
       case 0:
-        return { x: offset, y: 0, angle: 45 };
+        return {x: offset, y: 0, angle: 45};
       case 1:
-        return { x: window.innerWidth, y: offset, angle: 135 };
+        return {x: window.innerWidth, y: offset, angle: 135};
       case 2:
-        return { x: offset, y: window.innerHeight, angle: 225 };
+        return {x: offset, y: window.innerHeight, angle: 225};
       case 3:
-        return { x: 0, y: offset, angle: 315 };
+        return {x: 0, y: offset, angle: 315};
       default:
-        return { x: 0, y: 0, angle: 45 };
+        return {x: 0, y: 0, angle: 45};
     }
   }
 }
