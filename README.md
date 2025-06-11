@@ -102,8 +102,8 @@ Use the component in your template:
 - `maxSpeed`: The maximum speed of the shooting stars. Defaults to 30.
 - `minDelay`: The minimum delay between shooting stars in milliseconds. Defaults to 1200ms.
 - `maxDelay`: The maximum delay between shooting stars in milliseconds. Defaults to 4200ms.
-- `starColor`: The color of the shooting stars. Defaults to #9E00FF.
-- `trailColor`: The color of the trail left by the shooting stars. Defaults to #2EB9DF.
+- `starColor`: The color of the shooting stars. Defaults to #cd8ef8.
+- `trailColor`: The color of the trail left by the shooting stars. Defaults to #80dffa.
 - `starWidth`: The width of the shooting stars. Defaults to 10px.
 - `starHeight`: The height of the shooting stars. Defaults to 1px.
 

@@ -1,5 +1,16 @@
 import {CommonModule, isPlatformBrowser} from "@angular/common";
-import {AfterViewInit, Component, ElementRef, Inject, Input, OnDestroy, PLATFORM_ID, ViewChild,} from "@angular/core";
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  Inject,
+  Input,
+  OnDestroy,
+  PLATFORM_ID,
+  signal,
+  ViewChild,
+} from "@angular/core";
 import {ShootingStar, ShootingStarsProps, StarBackgroundProps, StarProps,} from "./ngx-starry-sky.types";
 
 @Component({
@@ -8,6 +19,7 @@ import {ShootingStar, ShootingStarsProps, StarBackgroundProps, StarProps,} from 
   imports: [CommonModule],
   templateUrl: "./ngx-starry-sky.component.html",
   styleUrl: "./ngx-starry-sky.component.scss",
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
   @ViewChild("OmStarrySkyCanvas")
@@ -53,20 +65,20 @@ export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
     maxSpeed: 30,
     minDelay: 1200,
     maxDelay: 4200,
-    starColor: "#9E00FF",
-    trailColor: "#2EB9DF",
+    starColor: "#cd8ef8",
+    trailColor: "#80dffa",
     starWidth: 10,
     starHeight: 1,
   };
 
-  shootingStar?: ShootingStar;
+  shootingStar = signal<ShootingStar | undefined>(undefined);
 
   style: any = {};
 
   private stars: StarProps[] = [];
 
-  private isInView = false;
-  private isAnimating = false;
+  private isInView = signal(false);
+  private isAnimating = signal(false);
   private animationFrameIdSky?: number;
   private animationFrameIdShootingStar?: number;
   private intersectionObserver?: IntersectionObserver;
@@ -105,10 +117,10 @@ export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
   }
 
   renderContents(isIntersecting: boolean) {
-    if (isIntersecting && !this.isInView) {
-      this.isInView = true;
+    if (isIntersecting && !this.isInView()) {
+      this.isInView.set(true);
 
-      if (!this.isAnimating) {
+      if (!this.isAnimating()) {
         this.animationFrameIdSky = requestAnimationFrame(() =>
           this.renderStarSky()
         );
@@ -117,7 +129,7 @@ export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
         );
       }
     } else if (!isIntersecting) {
-      this.isInView = false;
+      this.isInView.set(false);
     }
   }
 
@@ -139,12 +151,12 @@ export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
   }
 
   private renderStarSky(): void {
-    if (!this.isInView) {
-      this.isAnimating = false;
+    if (!this.isInView()) {
+      this.isAnimating.set(false);
       return;
     }
 
-    this.isAnimating = true;
+    this.isAnimating.set(true);
 
     const context = this.canvasRef.nativeElement.getContext("2d");
 
@@ -223,9 +235,13 @@ export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
   }
 
   private createShootingStar(): void {
+    if (this.disableShootingStars) {
+      return;
+    }
+
     const {x, y, angle} = this.getRandomStartPoint();
 
-    const newStar: ShootingStar = {
+    const shootingStar = {
       id: Date.now(),
       x,
       y,
@@ -239,7 +255,7 @@ export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
       distance: 0,
     };
 
-    this.shootingStar = newStar;
+    this.shootingStar.set(shootingStar);
 
     const randomDelay =
       Math.random() *
@@ -255,22 +271,22 @@ export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    if (!this.isInView) {
-      this.isAnimating = false;
+    if (!this.isInView()) {
+      this.isAnimating.set(false);
       return;
     }
 
-    this.isAnimating = true;
+    this.isAnimating.set(true);
 
     this.animationFrameIdShootingStar = requestAnimationFrame(() =>
       this.moveShootingStar()
     );
 
-    if (!this.shootingStar) {
+    if (!this.shootingStar()) {
       return;
     }
 
-    const prevStar = Object.assign({}, this.shootingStar);
+    const prevStar = Object.assign({}, this.shootingStar());
 
     const newX =
       prevStar.x + prevStar.speed * Math.cos((prevStar.angle * Math.PI) / 180);
@@ -281,33 +297,36 @@ export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
 
     if (
       newX < -20 ||
-      newX > window.innerWidth + 20 ||
+      newX > this.wrapperRef.nativeElement.offsetWidth + 20 ||
       newY < -20 ||
-      newY > window.innerHeight + 20
+      newY > this.wrapperRef.nativeElement.offsetHeight + 20
     ) {
-      this.shootingStar = undefined;
+      this.shootingStar.set(undefined);
       return;
     }
+
+    console.log('X', newX);
+    console.log('Y', newY);
 
     prevStar.x = newX;
     prevStar.y = newY;
     prevStar.distance = newDistance;
     prevStar.scale = newScale;
 
-    this.shootingStar = prevStar;
+    this.shootingStar.set(prevStar);
   }
 
   private getRandomStartPoint(): { x: number; y: number; angle: number } {
     const side = Math.floor(Math.random() * 4);
-    const offset = Math.random() * window.innerWidth;
+    const offset = Math.random() * this.wrapperRef.nativeElement.offsetWidth;
 
     switch (side) {
       case 0:
         return {x: offset, y: 0, angle: 45};
       case 1:
-        return {x: window.innerWidth, y: offset, angle: 135};
+        return {x: this.wrapperRef.nativeElement.offsetWidth, y: offset, angle: 135};
       case 2:
-        return {x: offset, y: window.innerHeight, angle: 225};
+        return {x: offset, y: this.wrapperRef.nativeElement.offsetHeight, angle: 225};
       case 3:
         return {x: 0, y: offset, angle: 315};
       default:
