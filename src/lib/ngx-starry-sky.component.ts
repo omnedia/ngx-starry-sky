@@ -305,9 +305,6 @@ export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    console.log('X', newX);
-    console.log('Y', newY);
-
     prevStar.x = newX;
     prevStar.y = newY;
     prevStar.distance = newDistance;
