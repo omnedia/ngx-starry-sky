@@ -4,7 +4,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  Inject,
+  inject,
   Input,
   OnDestroy,
   PLATFORM_ID,
@@ -82,11 +82,7 @@ export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
   private animationFrameIdSky?: number;
   private animationFrameIdShootingStar?: number;
   private intersectionObserver?: IntersectionObserver;
-
-  constructor(
-    @Inject(PLATFORM_ID) private platformId: object
-  ) {
-  }
+  private platformId = inject(PLATFORM_ID);
 
   ngAfterViewInit(): void {
     this.initStarSky();
@@ -101,7 +97,9 @@ export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    window.removeEventListener("resize", () => this.setCanvasSize());
+    if (isPlatformBrowser(this.platformId)) {
+      window.removeEventListener("resize", () => this.setCanvasSize());
+    }
 
     if (this.intersectionObserver) {
       this.intersectionObserver.disconnect();
@@ -134,8 +132,9 @@ export class NgxStarrySkyComponent implements AfterViewInit, OnDestroy {
   }
 
   private initStarSky(): void {
-    window.addEventListener("resize", () => this.setCanvasSize());
-
+    if (isPlatformBrowser(this.platformId)) {
+      window.addEventListener("resize", () => this.setCanvasSize());
+    }
     this.setCanvasSize();
     this.updateStars();
     this.renderStarSky();
